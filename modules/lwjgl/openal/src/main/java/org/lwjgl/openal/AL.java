@@ -77,7 +77,9 @@ public final class AL {
      */
     public static void create(String deviceArguments, int contextFrequency, int contextRefresh, boolean contextSynchronized, boolean openDevice)
         throws LWJGLException {
-        if (alContext == MemoryUtil.NULL && openDevice) {
+        // 守卫须同时检查 alcDevice：Cleanroom 的 LWJGLTransformer 会把 destroy() 换成 lwjglxx 版本，
+        // 该版本只清空 alcDevice 不清 alContext，仅判 alContext 会在设备被关后静默跳过重建
+        if ((alContext == MemoryUtil.NULL || alcDevice == null) && openDevice) {
             //ALDevice alDevice = ALDevice.create();
             long alDevice = ALC10.alcOpenDevice(deviceArguments);
             if(alDevice == MemoryUtil.NULL){
@@ -116,7 +118,7 @@ public final class AL {
     }
 
     public static void create() throws LWJGLException {
-        if (alContext == MemoryUtil.NULL) {
+        if (alContext == MemoryUtil.NULL || alcDevice == null) {
             //ALDevice alDevice = ALDevice.create();
             long alDevice = ALC10.alcOpenDevice((ByteBuffer)null);
             if(alDevice == MemoryUtil.NULL){
